@@ -6,7 +6,7 @@ export * from './options';
 /**
  * Player
  */
-export * from './ios/player';
+export * from './ios/hybrid';
 
 /**
  * Recorder
