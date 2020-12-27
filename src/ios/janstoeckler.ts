@@ -79,7 +79,6 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         }
         TNS_Player_Log('fileName', fileName);
 
-        this._setIOSAudioSessionOutput();
         this._setupPlayerItem(fileName, true);
 
         // Invoke after player is created and AVPlayerItem is specified
@@ -127,7 +126,6 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         this._statusObserver = PlayerObserverClass.alloc();
         this._statusObserver['_owner'] = this;
 
-        this._setIOSAudioSessionOutput();
         this._setupPlayerItem(options.audioFile, false);
 
         resolve();
@@ -299,23 +297,6 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
 
     // setup the status observer for the AVPlayerItem
     this._addStatusObserver(playerItem);
-  }
-
-  private _setIOSAudioSessionOutput() {
-    const audioSession = AVAudioSession.sharedInstance();
-    const output = audioSession.currentRoute.outputs.lastObject.portType;
-    TNS_Player_Log('output', output);
-
-    if (output.match(/Receiver/)) {
-      try {
-        audioSession.setCategoryError(AVAudioSessionCategoryPlayAndRecord);
-        audioSession.overrideOutputAudioPortError(AVAudioSessionPortOverride.Speaker);
-        audioSession.setActiveError(true);
-        TNS_Player_Log('audioSession category set and active');
-      } catch (err) {
-        TNS_Player_Log('setting audioSession category failed');
-      }
-    }
   }
 
   private _addStatusObserver(currentItem: AVPlayerItem) {

@@ -69,25 +69,6 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         this._errorCallback = options.errorCallback;
         this._infoCallback = options.infoCallback;
 
-        const audioSession = AVAudioSession.sharedInstance();
-        audioSession.setCategoryWithOptionsError(
-          AVAudioSessionCategoryAmbient,
-          AVAudioSessionCategoryOptions.DuckOthers
-        );
-        const output = audioSession.currentRoute.outputs.lastObject.portType;
-        TNS_Player_Log('output', output);
-
-        if (output.match(/Receiver/)) {
-          try {
-            audioSession.setCategoryError(AVAudioSessionCategoryPlayAndRecord);
-            audioSession.overrideOutputAudioPortError(AVAudioSessionPortOverride.Speaker);
-            audioSession.setActiveError(true);
-            TNS_Player_Log('audioSession category set and active');
-          } catch (err) {
-            TNS_Player_Log('setting audioSession category failed');
-          }
-        }
-
         const errorRef = new interop.Reference();
         this._player = AVAudioPlayer.alloc().initWithContentsOfURLError(NSURL.fileURLWithPath(fileName), errorRef);
         if (errorRef && errorRef.value) {
@@ -157,24 +138,6 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
             this._completeCallback = options.completeCallback;
             this._errorCallback = options.errorCallback;
             this._infoCallback = options.infoCallback;
-
-            const audioSession = AVAudioSession.sharedInstance();
-            audioSession.setCategoryWithOptionsError(
-              AVAudioSessionCategoryAmbient,
-              AVAudioSessionCategoryOptions.DuckOthers
-            );
-            const output = audioSession.currentRoute.outputs.lastObject.portType;
-
-            if (output.match(/Receiver/)) {
-              try {
-                audioSession.setCategoryError(AVAudioSessionCategoryPlayAndRecord);
-                audioSession.overrideOutputAudioPortError(AVAudioSessionPortOverride.Speaker);
-                audioSession.setActiveError(true);
-                TNS_Player_Log('audioSession category set and active');
-              } catch (err) {
-                TNS_Player_Log('setting audioSession category failed');
-              }
-            }
 
             const errorRef = new interop.Reference();
             this._player = AVAudioPlayer.alloc().initWithDataError(data, errorRef);
@@ -288,8 +251,6 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         if (this._player && this.isAudioPlaying()) {
           this._player.stop();
         }
-        const audioSession = AVAudioSession.sharedInstance();
-        audioSession.setActiveError(false);
         this._reset();
         resolve();
       } catch (ex) {
