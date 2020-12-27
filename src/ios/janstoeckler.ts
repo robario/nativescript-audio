@@ -343,7 +343,9 @@ class PlayerObserverClass extends NSObject {
         // send the ready event
         this['_owner']._sendEvent(AudioPlayerEvents.ready);
         // if playing url, we need to call play here
-        this['_owner']._player.play();
+        if (this['_owner']._options && this['_owner']._options.autoPlay) {
+          this['_owner']._player.play();
+        }
       }
     }
   }
