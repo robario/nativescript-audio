@@ -6,6 +6,7 @@ import { AudioPlayerEvents, AudioPlayerOptions } from '../options';
 
 export class TNSPlayer extends NSObject implements TNSPlayerI {
   private _player: AVPlayer;
+  private _options: AudioPlayerOptions;
   private _events: Observable;
 
   /**
@@ -66,6 +67,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
   }
 
   playFromFile(options: AudioPlayerOptions): Promise<any> {
+    this._options = options;
     return new Promise((resolve, reject) => {
       try {
         this._statusObserver = PlayerObserverClass.alloc();
@@ -80,15 +82,13 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         this._setIOSAudioSessionOutput();
         this._setupPlayerItem(fileName, true);
 
-        if (options.loop) {
-          // Invoke after player is created and AVPlayerItem is specified
-          NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(
-            this,
-            'playerItemDidReachEnd',
-            AVPlayerItemDidPlayToEndTimeNotification,
-            this._player.currentItem
-          );
-        }
+        // Invoke after player is created and AVPlayerItem is specified
+        NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(
+          this,
+          'playerItemDidReachEnd',
+          AVPlayerItemDidPlayToEndTimeNotification,
+          this._player.currentItem
+        );
 
         if (options.autoPlay) {
           this._player.play();
@@ -103,8 +103,12 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
 
   playerItemDidReachEnd() {
     if (this._player) {
-      this._player.seekToTime(kCMTimeZero);
-      this._player.play();
+      if (this._options.loop) {
+        this._player.seekToTime(kCMTimeZero);
+        this._player.play();
+      } else {
+        this._player.pause();
+      }
     }
   }
 
@@ -117,6 +121,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
   }
 
   playFromUrl(options: AudioPlayerOptions): Promise<any> {
+    this._options = options;
     return new Promise((resolve, reject) => {
       try {
         this._statusObserver = PlayerObserverClass.alloc();
@@ -201,6 +206,8 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
           if (this._player.currentItem) {
             this._removeStatusObserver(this._player.currentItem);
           }
+
+          NSNotificationCenter.defaultCenter.removeObserver(this);
 
           this._player.pause();
           this._player.replaceCurrentItemWithPlayerItem(null); // de-allocates the AVPlayer
