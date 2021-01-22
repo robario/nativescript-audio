@@ -15,7 +15,7 @@ export enum AudioFocusDurationHint {
 export class TNSPlayer implements TNSPlayerI {
   private _mediaPlayer: android.media.MediaPlayer;
   private _mAudioFocusGranted: boolean = false;
-  private _lastPlayerVolume; // ref to the last volume setting so we can reset after ducking
+  private _lastPlayerVolume = 1.0; // ref to the last volume setting so we can reset after ducking
   private _events: Observable;
   private _durationHint: AudioFocusDurationHint;
   private _options: AudioPlayerOptions;
@@ -40,14 +40,12 @@ export class TNSPlayer implements TNSPlayerI {
   }
 
   get volume(): number {
-    // TODO: find better way to get individual player volume
-    const ctx = this._getAndroidContext();
-    const mgr = ctx.getSystemService(android.content.Context.AUDIO_SERVICE);
-    return mgr.getStreamVolume(android.media.AudioManager.STREAM_MUSIC);
+    return this._lastPlayerVolume;
   }
 
   set volume(value: number) {
     if (this._player && value >= 0) {
+      this._lastPlayerVolume = value;
       this._player.setVolume(value, value);
     }
   }
@@ -425,12 +423,7 @@ export class TNSPlayer implements TNSPlayerI {
           TNS_Player_Log('AUDIOFOCUS_GAIN');
           // Set volume level to desired levels
           TNS_Player_Log('this._lastPlayerVolume', this._lastPlayerVolume);
-          // if last volume more than 10 just set to 1.0 float
-          if (this._lastPlayerVolume && this._lastPlayerVolume >= 10) {
-            this.volume = 1.0;
-          } else if (this._lastPlayerVolume) {
-            this.volume = parseFloat('0.' + this._lastPlayerVolume.toString());
-          }
+          this.volume = this._lastPlayerVolume;
 
           this.resume();
           break;
@@ -450,9 +443,10 @@ export class TNSPlayer implements TNSPlayerI {
         case android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
           TNS_Player_Log('AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK');
           // Lower the volume, keep playing
-          this._lastPlayerVolume = this.volume;
+          const _lastPlayerVolume = this._lastPlayerVolume;
           TNS_Player_Log('this._lastPlayerVolume', this._lastPlayerVolume);
           this.volume = 0.2;
+          this._lastPlayerVolume = _lastPlayerVolume;
           break;
       }
     }
