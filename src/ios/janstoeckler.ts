@@ -104,6 +104,9 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         this._player.play();
       } else {
         this._player.pause();
+        if (this._options.completeCallback) {
+          this._options.completeCallback();
+        }
       }
     }
   }
