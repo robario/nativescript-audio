@@ -1,3 +1,4 @@
+import * as application from 'tns-core-modules/application';
 import { Observable } from 'tns-core-modules/data/observable';
 import { knownFolders, path } from 'tns-core-modules/file-system';
 import { isString } from 'tns-core-modules/utils/types';
@@ -8,6 +9,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
   private _player: AVPlayer;
   private _options: AudioPlayerOptions;
   private _events: Observable;
+  private _observer;
 
   /**
    * Status Observer is for watching the status of the AVPlayerItem to know if playback is ready or not.
@@ -82,12 +84,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         this._setupPlayerItem(fileName, true);
 
         // Invoke after player is created and AVPlayerItem is specified
-        NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(
-          this,
-          'playerItemDidReachEnd',
-          AVPlayerItemDidPlayToEndTimeNotification,
-          this._player.currentItem
-        );
+        this._observer = application.ios.addNotificationObserver(AVPlayerItemDidPlayToEndTimeNotification, this.playerItemDidReachEnd.bind(this));
 
         if (options.autoPlay) {
           this._player.play();
@@ -205,7 +202,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
             this._removeStatusObserver(this._player.currentItem);
           }
 
-          NSNotificationCenter.defaultCenter.removeObserver(this);
+          application.ios.removeNotificationObserver(this._observer, AVPlayerItemDidPlayToEndTimeNotification);
 
           this._player.pause();
           this._player.replaceCurrentItemWithPlayerItem(null); // de-allocates the AVPlayer
