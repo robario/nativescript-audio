@@ -120,19 +120,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
   }
 
   playFromUrl(options: AudioPlayerOptions): Promise<any> {
-    this._options = options;
-    return new Promise((resolve, reject) => {
-      try {
-        this._statusObserver = PlayerObserverClass.alloc();
-        this._statusObserver['_owner'] = this;
-
-        this._setupPlayerItem(options.audioFile, false);
-
-        resolve();
-      } catch (ex) {
-        reject(ex);
-      }
-    });
+    return this.playFromFile(options);
   }
 
   pause(): Promise<any> {
