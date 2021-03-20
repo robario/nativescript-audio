@@ -1,6 +1,7 @@
 import * as application from 'tns-core-modules/application';
 import { Observable } from 'tns-core-modules/data/observable';
 import { knownFolders, path } from 'tns-core-modules/file-system';
+import * as timer from 'tns-core-modules/timer';
 import { isString } from 'tns-core-modules/utils/types';
 import { TNSPlayerI, TNSPlayerUtil, TNS_Player_Log } from '../common';
 import { AudioPlayerEvents, AudioPlayerOptions } from '../options';
@@ -174,6 +175,20 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
           TNS_Player_Log('seekTo', time);
           this._player.seekToTime(CMTimeMakeWithSeconds(time, 1000));
           resolve(true);
+        } else {
+          let retry = 50;
+          const waitCurrentItemStatus = () => {
+            if (!this._player || !this._player.currentItem || --retry <= 0) {
+              reject();
+              return;
+            }
+            if (this._player.currentItem.status !== AVPlayerItemStatus.Unknown) {
+              this.seekTo(time).then(resolve, reject);
+              return;
+            }
+            timer.setTimeout(waitCurrentItemStatus, 100);
+          };
+          waitCurrentItemStatus();
         }
       } catch (ex) {
         TNS_Player_Log('seekTo error', ex);
