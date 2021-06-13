@@ -188,16 +188,6 @@ export class TNSPlayer implements TNSPlayerI {
           // https://developer.android.com/reference/android/app/Activity.html#setVolumeControlStream(int)
           app.android.foregroundActivity.setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
 
-          // register the receiver so when calls or another app takes main audio focus the player pauses
-          app.android.registerBroadcastReceiver(
-            android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY,
-            (context: android.content.Context, intent: android.content.Intent) => {
-              TNS_Player_Log('ACTION_AUDIO_BECOMING_NOISY onReceiveCallback');
-              TNS_Player_Log('intent', intent);
-              this.pause();
-            }
-          );
-
           this._player.start();
         }
         resolve(true);
@@ -259,10 +249,6 @@ export class TNSPlayer implements TNSPlayerI {
           // Remove _options since we are back to the Idle state
           // (Refer to: https://developer.android.com/reference/android/media/MediaPlayer#state-diagram)
           this._options = undefined;
-
-          TNS_Player_Log('unregisterBroadcastReceiver ACTION_AUDIO_BECOMING_NOISY...');
-          // unregister broadcast receiver
-          app.android.unregisterBroadcastReceiver(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 
           TNS_Player_Log('abandoning audio focus...');
           this._abandonAudioFocus();
