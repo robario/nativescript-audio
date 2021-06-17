@@ -173,8 +173,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
       try {
         if (this._player.currentItem && this._player.currentItem.status === AVPlayerItemStatus.ReadyToPlay) {
           TNS_Player_Log('seekTo', time);
-          this._player.seekToTime(CMTimeMakeWithSeconds(time, 1000));
-          resolve(true);
+          this._player.seekToTimeCompletionHandler(CMTimeMakeWithSeconds(time, 1000), (finished) => { finished ? resolve(true) : reject(); });
         } else {
           let retry = 50;
           const waitCurrentItemStatus = () => {
