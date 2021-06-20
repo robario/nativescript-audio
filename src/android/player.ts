@@ -424,7 +424,7 @@ export class TNSPlayer implements TNSPlayerI {
         case android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
           TNS_Player_Log('AUDIOFOCUS_LOSS_TRANSIENT');
           // Temporary loss of audio focus - expect to get it back - you can keep your resources around
-          this.pause();
+          // this.pause();
           break;
         case android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
           TNS_Player_Log('AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK');
