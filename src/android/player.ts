@@ -1,6 +1,8 @@
-import * as app from 'tns-core-modules/application';
-import { Observable } from 'tns-core-modules/data/observable';
-import { isFileOrResourcePath } from 'tns-core-modules/utils/utils';
+import {
+  Application,
+  Observable,
+  Utils,
+} from '@nativescript/core';
 import { resolveAudioFilePath, TNSPlayerI, TNSPlayerUtil, TNS_Player_Log } from '../common';
 import { AudioPlayerEvents, AudioPlayerOptions } from '../options';
 
@@ -95,7 +97,7 @@ export class TNSPlayer implements TNSPlayerI {
         this._player.setDataSource(audioPath);
 
         // check if local file or remote - local then `prepare` is okay https://developer.android.com/reference/android/media/MediaPlayer.html#prepare()
-        if (isFileOrResourcePath(audioPath)) {
+        if (Utils.isFileOrResourcePath(audioPath)) {
           TNS_Player_Log('preparing mediaPlayer...');
           this._player.prepare();
         } else {
@@ -188,7 +190,7 @@ export class TNSPlayer implements TNSPlayerI {
           this._sendEvent(AudioPlayerEvents.started);
           // set volume controls
           // https://developer.android.com/reference/android/app/Activity.html#setVolumeControlStream(int)
-          app.android.foregroundActivity.setVolumeControlStream(this._streamType);
+          Application.android.foregroundActivity.setVolumeControlStream(this._streamType);
 
           this._player.start();
         }
@@ -342,9 +344,9 @@ export class TNSPlayer implements TNSPlayerI {
   }
 
   private _getAndroidContext() {
-    let ctx = app.android.context;
+    let ctx = Application.android.context;
     if (!ctx) {
-      ctx = app.getNativeApplication().getApplicationContext();
+      ctx = Application.getNativeApplication().getApplicationContext();
     }
 
     if (ctx === null) {

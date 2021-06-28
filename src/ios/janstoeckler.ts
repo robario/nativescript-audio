@@ -1,12 +1,15 @@
-import * as application from 'tns-core-modules/application';
-import { Observable } from 'tns-core-modules/data/observable';
-import { knownFolders, path } from 'tns-core-modules/file-system';
-import * as timer from 'tns-core-modules/timer';
-import { isString } from 'tns-core-modules/utils/types';
+import {
+  Application,
+  Observable,
+  knownFolders,
+  path as nsFilePath,
+  Utils
+} from '@nativescript/core';
 import { TNSPlayerI, TNSPlayerUtil, TNS_Player_Log } from '../common';
 import { AudioPlayerEvents, AudioPlayerOptions } from '../options';
 
-export class TNSPlayer extends NSObject implements TNSPlayerI {
+@NativeClass()
+class TNSPlayer extends NSObject implements TNSPlayerI {
   private _player: AVPlayer;
   private _options: AudioPlayerOptions;
   private _events: Observable;
@@ -76,16 +79,16 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
         this._statusObserver = PlayerObserverClass.alloc();
         this._statusObserver['_owner'] = this;
 
-        let fileName = isString(options.audioFile) ? options.audioFile.trim() : '';
+        let fileName = Utils.isString(options.audioFile) ? options.audioFile.trim() : '';
         if (fileName.indexOf('~/') === 0) {
-          fileName = path.join(knownFolders.currentApp().path, fileName.replace('~/', ''));
+          fileName = nsFilePath.join(knownFolders.currentApp().path, fileName.replace('~/', ''));
         }
         TNS_Player_Log('fileName', fileName);
 
         this._setupPlayerItem(fileName, true);
 
         // Invoke after player is created and AVPlayerItem is specified
-        this._observer = application.ios.addNotificationObserver(AVPlayerItemDidPlayToEndTimeNotification, this.playerItemDidReachEnd.bind(this));
+        this._observer = Application.ios.addNotificationObserver(AVPlayerItemDidPlayToEndTimeNotification, this.playerItemDidReachEnd.bind(this));
 
         if (options.autoPlay) {
           this._player.play();
@@ -185,7 +188,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
               this.seekTo(time).then(resolve, reject);
               return;
             }
-            timer.setTimeout(waitCurrentItemStatus, 100);
+            setTimeout(waitCurrentItemStatus, 100);
           };
           waitCurrentItemStatus();
         }
@@ -207,7 +210,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
             this._removeStatusObserver(this._player.currentItem);
           }
 
-          application.ios.removeNotificationObserver(this._observer, AVPlayerItemDidPlayToEndTimeNotification);
+          Application.ios.removeNotificationObserver(this._observer, AVPlayerItemDidPlayToEndTimeNotification);
 
           this._player.pause();
           this._player.replaceCurrentItemWithPlayerItem(null); // de-allocates the AVPlayer
@@ -319,6 +322,9 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
   }
 }
 
+export { TNSPlayer };
+
+@NativeClass()
 class PlayerObserverClass extends NSObject {
   observeValueForKeyPathOfObjectChangeContext(path: string, obj: Object, change: NSDictionary<any, any>, context: any) {
     if (path === 'status') {

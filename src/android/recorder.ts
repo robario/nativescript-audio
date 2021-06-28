@@ -1,5 +1,5 @@
 import * as permissions from 'nativescript-permissions';
-import * as app from 'tns-core-modules/application';
+import { Application } from '@nativescript/core';
 import { TNSRecorderUtil, TNSRecordI, TNS_Recorder_Log } from '../common';
 import { AudioRecorderOptions } from '../options';
 
@@ -15,7 +15,7 @@ export class TNSRecorder implements TNSRecordI {
   }
 
   public static CAN_RECORD(): boolean {
-    const pManager = app.android.context.getPackageManager();
+    const pManager = Application.android.context.getPackageManager();
     const canRecord = pManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_MICROPHONE);
     if (canRecord) {
       return true;

@@ -8,14 +8,19 @@
     "experimentalDecorators": true,
     "noLib": false,
     "emitDecoratorMetadata": true,
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es6", "dom"],
+    "target": "ES2017",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "rootDir": ".",
     "baseUrl": ".",
+    "plugins": [{
+      "transform": "@nativescript/webpack/transformers/ns-transform-native-classes",
+      "type": "raw"
+    }],
     "paths": {
-      "*": ["./node_modules/tns-core-modules/*", "./node_modules/*"]
+      "*": ["./node_modules/*"]
     }
   },
   "exclude": ["node_modules"]

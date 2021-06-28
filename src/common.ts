@@ -1,5 +1,8 @@
-import * as fs from 'tns-core-modules/file-system';
-import { isString } from 'tns-core-modules/utils/types';
+import {
+  knownFolders,
+  path,
+  Utils,
+} from '@nativescript/core';
 import { AudioPlayerOptions, AudioRecorderOptions } from './options';
 
 export class TNSPlayerUtil {
@@ -129,19 +132,19 @@ export function isStringUrl(value: string): boolean {
 /**
  * Will determine if a string is a url or a local path. If the string is a url it will return the url.
  * If it is a local path, then the file-system module will return the file system path.
- * @param path [string]
+ * @param pathOrUrl [string]
  */
-export function resolveAudioFilePath(path: string) {
-  if (path) {
-    const isUrl = isStringUrl(path);
+export function resolveAudioFilePath(pathOrUrl: string) {
+  if (pathOrUrl) {
+    const isUrl = isStringUrl(pathOrUrl);
     // if it's a url just return the audio file url
     if (isUrl === true) {
-      return path;
+      return pathOrUrl;
     } else {
       let audioPath;
-      let fileName = isString(path) ? path.trim() : '';
+      let fileName = Utils.isString(pathOrUrl) ? pathOrUrl.trim() : '';
       if (fileName.indexOf('~/') === 0) {
-        fileName = fs.path.join(fs.knownFolders.currentApp().path, fileName.replace('~/', ''));
+        fileName = path.join(knownFolders.currentApp().path, fileName.replace('~/', ''));
         audioPath = fileName;
       } else {
         audioPath = fileName;

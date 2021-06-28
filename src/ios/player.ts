@@ -1,11 +1,15 @@
-import { knownFolders, path } from 'tns-core-modules/file-system';
-import { isString } from 'tns-core-modules/utils/types';
+import {
+  knownFolders,
+  path,
+  Utils,
+} from '@nativescript/core';
 import { TNSPlayerI, TNSPlayerUtil, TNS_Player_Log } from '../common';
 import { AudioPlayerOptions } from '../options';
 
 declare var AVAudioPlayer;
 
-export class TNSPlayer extends NSObject implements TNSPlayerI {
+@NativeClass()
+class TNSPlayer extends NSObject implements TNSPlayerI {
   public static ObjCProtocols = [AVAudioPlayerDelegate];
   private _player: AVAudioPlayer;
   private _task: NSURLSessionDataTask;
@@ -59,7 +63,7 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
       }
 
       try {
-        let fileName = isString(options.audioFile) ? options.audioFile.trim() : '';
+        let fileName = Utils.isString(options.audioFile) ? options.audioFile.trim() : '';
         if (fileName.indexOf('~/') === 0) {
           fileName = path.join(knownFolders.currentApp().path, fileName.replace('~/', ''));
         }
@@ -317,3 +321,5 @@ export class TNSPlayer extends NSObject implements TNSPlayerI {
     }
   }
 }
+
+export { TNSPlayer };

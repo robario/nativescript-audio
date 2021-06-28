@@ -1,6 +1,7 @@
 import { TNSRecorderUtil, TNSRecordI, TNS_Recorder_Log } from '../common';
 import { AudioRecorderOptions } from '../options';
 
+@NativeClass()
 export class TNSRecorder extends NSObject implements TNSRecordI {
   public static ObjCProtocols = [AVAudioRecorderDelegate];
   private _recorder: any;
