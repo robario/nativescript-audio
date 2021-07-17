@@ -196,11 +196,12 @@ export declare class TNSPlayer {
   readonly currentTime: number;
 
   /**
+   * @param  {number} streamType - stream type
    * @param  {AudioFocusDurationHint} durationHint - Determines differents behaviors by
    * the system and the other application that previously held audio focus.
    * See the {@link https://developer.android.com/reference/android/media/AudioFocusRequest#the-different-types-of-focus-requests different  types of focus requests}
    */
-  constructor(durationHint?: AudioFocusDurationHint);
+  constructor(streamType?: number, durationHint?: AudioFocusDurationHint);
 
   initFromFile(options: AudioPlayerOptions): Promise<any>;
 

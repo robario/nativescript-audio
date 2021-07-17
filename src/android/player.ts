@@ -17,10 +17,12 @@ export class TNSPlayer implements TNSPlayerI {
   private _mAudioFocusGranted: boolean = false;
   private _lastPlayerVolume = 1.0; // ref to the last volume setting so we can reset after ducking
   private _events: Observable;
+  private _streamType: number;
   private _durationHint: AudioFocusDurationHint;
   private _options: AudioPlayerOptions;
 
-  constructor(durationHint: AudioFocusDurationHint = AudioFocusDurationHint.AUDIOFOCUS_GAIN) {
+  constructor(streamType: number = android.media.AudioManager.STREAM_MUSIC, durationHint: AudioFocusDurationHint = AudioFocusDurationHint.AUDIOFOCUS_GAIN) {
+    this._streamType = streamType;
     this._durationHint = durationHint;
   }
 
@@ -85,7 +87,7 @@ export class TNSPlayer implements TNSPlayerI {
         const audioPath = resolveAudioFilePath(options.audioFile);
         TNS_Player_Log('audioPath', audioPath);
 
-        this._player.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
+        this._player.setAudioStreamType(this._streamType);
 
         TNS_Player_Log('resetting mediaPlayer...');
         this._player.reset();
@@ -186,7 +188,7 @@ export class TNSPlayer implements TNSPlayerI {
           this._sendEvent(AudioPlayerEvents.started);
           // set volume controls
           // https://developer.android.com/reference/android/app/Activity.html#setVolumeControlStream(int)
-          app.android.foregroundActivity.setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
+          app.android.foregroundActivity.setVolumeControlStream(this._streamType);
 
           this._player.start();
         }
@@ -308,7 +310,7 @@ export class TNSPlayer implements TNSPlayerI {
       // Request audio focus for play back
       const focusResult = am.requestAudioFocus(
         this._mOnAudioFocusChangeListener,
-        android.media.AudioManager.STREAM_MUSIC,
+        this._streamType,
         this._durationHint
       );
 
